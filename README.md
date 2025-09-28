@@ -1,25 +1,145 @@
-# Cloudflare Workers OpenAPI 3.1
+# Cloudflare Workers API - Reports Management System
 
-This is a Cloudflare Worker with OpenAPI 3.1 using [chanfana](https://github.com/cloudflare/chanfana) and [Hono](https://github.com/honojs/hono).
+A Cloudflare Worker-based API built with OpenAPI 3.1, Hono, and Drizzle ORM for managing reports with file upload/download capabilities.
 
-This is an example project made to be used as a quick start into building OpenAPI compliant Workers that generates the
-`openapi.json` schema automatically from code and validates the incoming request to the defined parameters or request body.
+## Features
 
-## Get started
+- **OpenAPI 3.1 Compliant**: Automatic OpenAPI schema generation with [chanfana](https://github.com/cloudflare/chanfana)
+- **RESTful API**: Full CRUD operations for reports management
+- **File Handling**: Upload and download files with R2 storage
+- **Database Integration**: SQLite with D1 database using Drizzle ORM
+- **TypeScript**: Fully typed with Cloudflare Workers TypeScript support
 
-1. Sign up for [Cloudflare Workers](https://workers.dev). The free tier is more than enough for most use cases.
-2. Clone this project and install dependencies with `npm install`
-3. Run `wrangler login` to login to your Cloudflare account in wrangler
-4. Run `wrangler deploy` to publish the API to Cloudflare Workers
+## Tech Stack
 
-## Project structure
+- **Runtime**: Cloudflare Workers
+- **Framework**: [Hono](https://hono.dev/) - Fast, lightweight web framework
+- **OpenAPI**: [chanfana](https://github.com/cloudflare/chanfana) - OpenAPI 3.1 schema generation
+- **Database**: Cloudflare D1 (SQLite) with [Drizzle ORM](https://orm.drizzle.team/)
+- **Storage**: Cloudflare R2 for file storage
+- **Validation**: Zod schema validation
 
-1. Your main router is defined in `src/index.ts`.
-2. Each endpoint has its own file in `src/endpoints/`.
-3. For more information read the [chanfana documentation](https://chanfana.pages.dev/) and [Hono documentation](https://hono.dev/docs).
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/reports` | List all reports |
+| POST | `/api/reports` | Create a new report |
+| GET | `/api/reports/:reportId` | Get specific report |
+| DELETE | `/api/reports/:reportId` | Delete a report |
+| POST | `/api/reports/upload` | Upload report files |
+| GET | `/api/reports/:reportId/download/:fileType` | Download report files |
+| GET | `/api/reports/:reportId/file/:fileType` | Direct file download |
+
+## Quick Start
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18 or higher)
+- [Cloudflare account](https://dash.cloudflare.com/sign-up)
+- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/)
+
+### Installation
+
+1. **Clone and install dependencies:**
+   ```bash
+   git clone <repository-url>
+   cd apis-mono
+   npm install
+   ```
+
+2. **Login to Cloudflare:**
+   ```bash
+   wrangler login
+   ```
+
+3. **Setup database (local development):**
+   ```bash
+   npm run db:local
+   ```
+
+4. **Start development server:**
+   ```bash
+   npm run dev
+   ```
+
+5. **Access the API:**
+   - OpenAPI Documentation: http://localhost:8787/
+   - Test endpoint: http://localhost:8787/test
+
+### Deployment
+
+1. **Setup production database:**
+   ```bash
+   npm run db:setup
+   ```
+
+2. **Deploy to Cloudflare Workers:**
+   ```bash
+   npm run deploy
+   ```
+
+## Project Structure
+
+```
+src/
+├── index.ts              # Main application entry point
+├── types.ts              # TypeScript type definitions
+├── db/
+│   ├── index.ts          # Database configuration
+│   └── schema.ts         # Database schema definitions
+├── endpoints/            # API endpoint handlers
+│   ├── reportCreate.ts
+│   ├── reportDelete.ts
+│   ├── reportFetch.ts
+│   ├── reportList.ts
+│   ├── reportFileUpload.ts
+│   ├── reportFileDownload.ts
+│   └── reportFileDirectDownload.ts
+└── utils/
+    └── index.ts          # Utility functions
+```
 
 ## Development
 
-1. Run `wrangler dev` to start a local instance of the API.
-2. Open `http://localhost:8787/` in your browser to see the Swagger interface where you can try the endpoints.
-3. Changes made in the `src/` folder will automatically trigger the server to reload, you only need to refresh the Swagger interface.
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run deploy` - Deploy to production
+- `npm run start` - Start with production environment
+- `npm run cf-typegen` - Generate Cloudflare types
+- `npm run db:local` - Apply database migrations locally
+- `npm run db:setup` - Setup database for both local and production
+
+### Environment Configuration
+
+The project uses Cloudflare Workers bindings:
+- `DB` - D1 database for reports
+- `REPORTS_BUCKET` - R2 bucket for file storage
+- `DOWNLOAD_SECRET` - Secret for secure file downloads
+
+## Database Schema
+
+The application uses the following database schema:
+
+- **reports** table: Stores report metadata
+- **report_files** table: Manages file attachments
+
+## File Handling
+
+Files are stored in Cloudflare R2 with the following features:
+- Secure upload with validation
+- Direct download URLs with authentication
+- File type categorization
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test locally with `npm run dev`
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.
