@@ -3,6 +3,7 @@ import { z } from "zod";
 import { type AppContext, Report } from "../types";
 import { createDatabase, reports } from "../db";
 import { and, gte, lte, desc, count } from "drizzle-orm";
+import { createResponse, createErrorResponse } from "../utils";
 
 export class ReportList extends OpenAPIRoute {
   schema = {
@@ -28,17 +29,13 @@ export class ReportList extends OpenAPIRoute {
         content: {
           "application/json": {
             schema: z.object({
-              series: z.object({
-                success: Bool(),
-                result: z.object({
-                  reports: Report.array(),
-                  pagination: z.object({
-                    page: z.number(),
-                    limit: z.number(),
-                    total: z.number(),
-                    total_pages: z.number(),
-                  }),
-                }),
+              success: Bool(),
+              reports: Report.array(),
+              pagination: z.object({
+                page: z.number(),
+                limit: z.number(),
+                total: z.number(),
+                total_pages: z.number(),
               }),
             }),
           },
@@ -99,8 +96,7 @@ export class ReportList extends OpenAPIRoute {
         updated_at: report.updated_at,
       }));
 
-      return {
-        success: true,
+      return createResponse(true, {
         reports: formattedReports,
         pagination: {
           page,
@@ -108,16 +104,10 @@ export class ReportList extends OpenAPIRoute {
           total,
           total_pages: totalPages,
         },
-      };
+      });
     } catch (error) {
       console.error("Error listing reports:", error);
-      return Response.json(
-        {
-          success: false,
-          error: "Internal server error",
-        },
-        { status: 500 }
-      );
+      return createErrorResponse("Internal server error", 500);
     }
   }
 }

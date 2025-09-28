@@ -1,8 +1,7 @@
 import { Bool, OpenAPIRoute, Num } from "chanfana";
 import { z } from "zod";
 import { type AppContext, Report } from "../types";
-import { createDatabase, reports } from "../db";
-import { eq } from "drizzle-orm";
+import { getReportById, createResponse, createErrorResponse } from "../utils";
 
 export class ReportFetch extends OpenAPIRoute {
   schema = {
@@ -19,12 +18,8 @@ export class ReportFetch extends OpenAPIRoute {
         content: {
           "application/json": {
             schema: z.object({
-              series: z.object({
-                success: Bool(),
-                result: z.object({
-                  report: Report,
-                }),
-              }),
+              success: Bool(),
+              report: Report,
             }),
           },
         },
@@ -34,10 +29,8 @@ export class ReportFetch extends OpenAPIRoute {
         content: {
           "application/json": {
             schema: z.object({
-              series: z.object({
-                success: Bool(),
-                error: z.string(),
-              }),
+              success: Bool(),
+              error: z.string(),
             }),
           },
         },
@@ -51,29 +44,15 @@ export class ReportFetch extends OpenAPIRoute {
       const data = await this.getValidatedData<typeof this.schema>();
       const { reportId } = data.params;
 
-      // Create database connection
-      const db = createDatabase(c.env);
-
-      // Fetch report from database using Drizzle ORM
-      const [report] = await db
-        .select()
-        .from(reports)
-        .where(eq(reports.id, reportId))
-        .limit(1);
+      // Fetch report from database
+      const report = await getReportById(reportId, c);
 
       if (!report) {
-        return Response.json(
-          {
-            success: false,
-            error: "Report not found",
-          },
-          { status: 404 }
-        );
+        return createErrorResponse("Report not found", 404);
       }
 
       // Return the report
-      return {
-        success: true,
+      return createResponse(true, {
         report: {
           id: report.id,
           title: report.title,
@@ -84,16 +63,10 @@ export class ReportFetch extends OpenAPIRoute {
           created_at: report.created_at,
           updated_at: report.updated_at,
         },
-      };
+      });
     } catch (error) {
       console.error("Error fetching report:", error);
-      return Response.json(
-        {
-          success: false,
-          error: "Internal server error",
-        },
-        { status: 500 }
-      );
+      return createErrorResponse("Internal server error", 500);
     }
   }
 }

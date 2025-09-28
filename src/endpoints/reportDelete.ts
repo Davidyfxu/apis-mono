@@ -3,6 +3,12 @@ import { z } from "zod";
 import { type AppContext, Report } from "../types";
 import { createDatabase, reports } from "../db";
 import { eq } from "drizzle-orm";
+import {
+  getReportById,
+  extractFileKey,
+  createResponse,
+  createErrorResponse,
+} from "../utils";
 
 export class ReportDelete extends OpenAPIRoute {
   schema = {
@@ -19,12 +25,8 @@ export class ReportDelete extends OpenAPIRoute {
         content: {
           "application/json": {
             schema: z.object({
-              series: z.object({
-                success: Bool(),
-                result: z.object({
-                  report: Report,
-                }),
-              }),
+              success: Bool(),
+              report: Report,
             }),
           },
         },
@@ -34,10 +36,8 @@ export class ReportDelete extends OpenAPIRoute {
         content: {
           "application/json": {
             schema: z.object({
-              series: z.object({
-                success: Bool(),
-                error: z.string(),
-              }),
+              success: Bool(),
+              error: z.string(),
             }),
           },
         },
@@ -55,32 +55,22 @@ export class ReportDelete extends OpenAPIRoute {
       const db = createDatabase(c.env);
 
       // First, fetch the report to get file URLs for cleanup
-      const [report] = await db
-        .select()
-        .from(reports)
-        .where(eq(reports.id, reportId))
-        .limit(1);
+      const report = await getReportById(reportId, c);
 
       if (!report) {
-        return Response.json(
-          {
-            success: false,
-            error: "Report not found",
-          },
-          { status: 404 }
-        );
+        return createErrorResponse("Report not found", 404);
       }
 
       // Delete files from R2 if they exist
       try {
         if (report.word_file_url) {
-          const wordKey = (report.word_file_url as string).split("/").pop();
+          const wordKey = extractFileKey(report.word_file_url);
           if (wordKey) {
             await c.env.REPORTS_BUCKET.delete(wordKey);
           }
         }
         if (report.mp3_file_url) {
-          const mp3Key = (report.mp3_file_url as string).split("/").pop();
+          const mp3Key = extractFileKey(report.mp3_file_url);
           if (mp3Key) {
             await c.env.REPORTS_BUCKET.delete(mp3Key);
           }
@@ -97,18 +87,11 @@ export class ReportDelete extends OpenAPIRoute {
         .returning();
 
       if (!deletedReport) {
-        return Response.json(
-          {
-            success: false,
-            error: "Failed to delete report",
-          },
-          { status: 400 }
-        );
+        return createErrorResponse("Failed to delete report", 400);
       }
 
       // Return the deleted report for confirmation
-      return {
-        success: true,
+      return createResponse(true, {
         report: {
           id: deletedReport.id,
           title: deletedReport.title,
@@ -119,16 +102,10 @@ export class ReportDelete extends OpenAPIRoute {
           created_at: deletedReport.created_at,
           updated_at: deletedReport.updated_at,
         },
-      };
+      });
     } catch (error) {
       console.error("Error deleting report:", error);
-      return Response.json(
-        {
-          success: false,
-          error: "Internal server error",
-        },
-        { status: 500 }
-      );
+      return createErrorResponse("Internal server error", 500);
     }
   }
 }

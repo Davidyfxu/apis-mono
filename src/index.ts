@@ -20,7 +20,7 @@ openapi.get("/api/reports", ReportList);
 openapi.post("/api/reports", ReportCreate);
 openapi.get("/api/reports/:reportId", ReportFetch);
 openapi.delete("/api/reports/:reportId", ReportDelete);
-openapi.post("/api/reports/:reportId/upload", ReportFileUpload);
+openapi.post("/api/reports/upload", ReportFileUpload);
 openapi.get("/api/reports/:reportId/download/:fileType", ReportFileDownload);
 openapi.get("/api/reports/:reportId/file/:fileType", ReportFileDirectDownload);
 

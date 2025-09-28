@@ -1,8 +1,11 @@
 import { OpenAPIRoute } from "chanfana";
 import { z } from "zod";
 import { type AppContext } from "../types";
-import { createDatabase, reports } from "../db";
-import { eq } from "drizzle-orm";
+import {
+  getReportById,
+  getFileContentType,
+  createErrorResponse,
+} from "../utils";
 import { createHash } from "crypto";
 
 export class ReportFileDirectDownload extends OpenAPIRoute {
@@ -99,26 +102,16 @@ export class ReportFileDirectDownload extends OpenAPIRoute {
 
       // Additional validation for token
       if (!token || token.trim().length === 0) {
-        return Response.json(
-          {
-            success: false,
-            error:
-              "Download token is required. Please obtain a download URL first.",
-          },
-          { status: 400 }
+        return createErrorResponse(
+          "Download token is required. Please obtain a download URL first.",
+          400
         );
       }
 
       // Verify the download token
       const tokenVerification = await this.verifyDownloadToken(token, c);
       if (!tokenVerification.valid) {
-        return Response.json(
-          {
-            success: false,
-            error: "Invalid or expired download token",
-          },
-          { status: 400 }
-        );
+        return createErrorResponse("Invalid or expired download token", 400);
       }
 
       // Get the file from R2 using the verified file key
@@ -127,28 +120,14 @@ export class ReportFileDirectDownload extends OpenAPIRoute {
       );
 
       if (!fileObject) {
-        return Response.json(
-          {
-            success: false,
-            error: "File not found in storage",
-          },
-          { status: 404 }
-        );
+        return createErrorResponse("File not found in storage", 404);
       }
 
       // Get report details for filename
-      const db = createDatabase(c.env);
-      const [report] = await db
-        .select()
-        .from(reports)
-        .where(eq(reports.id, reportId))
-        .limit(1);
+      const report = await getReportById(reportId, c);
 
       // Determine content type and filename
-      const contentType =
-        fileType === "word"
-          ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-          : "audio/mpeg";
+      const contentType = getFileContentType(fileType as "word" | "mp3");
 
       const filename = report
         ? `${report.title}_${fileType}.${fileType === "word" ? "docx" : "mp3"}`
@@ -170,23 +149,13 @@ export class ReportFileDirectDownload extends OpenAPIRoute {
 
       // Check if it's a validation error (missing token)
       if (error instanceof Error && error.message.includes("token")) {
-        return Response.json(
-          {
-            success: false,
-            error:
-              "Download token is required. Please obtain a download URL first.",
-          },
-          { status: 400 }
+        return createErrorResponse(
+          "Download token is required. Please obtain a download URL first.",
+          400
         );
       }
 
-      return Response.json(
-        {
-          success: false,
-          error: "Internal server error",
-        },
-        { status: 500 }
-      );
+      return createErrorResponse("Internal server error", 500);
     }
   }
 }
