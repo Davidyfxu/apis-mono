@@ -5,13 +5,19 @@
   "scripts": {
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
-    "start": "wrangler dev",
-    "cf-typegen": "wrangler types"
+    "start": "wrangler dev --env=production",
+    "cf-typegen": "wrangler types",
+    "db:setup": "wrangler d1 migrations apply reports-db --local && wrangler d1 migrations apply reports-db",
+    "db:local": "wrangler d1 migrations apply reports-db --local",
+    "db:prod": "wrangler d1 migrations apply reports-db"
   },
   "dependencies": {
-    "chanfana": "^2.6.3",
-    "hono": "^4.6.20",
-    "zod": "^3.24.1"
+    "@libsql/client": "^0.15.15",
+    "chanfana": "^2.8.2",
+    "crypto": "^1.0.1",
+    "drizzle-orm": "^0.36.4",
+    "hono": "^4.9.9",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "22.13.0",

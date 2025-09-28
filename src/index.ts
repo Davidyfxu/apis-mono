@@ -1,26 +1,31 @@
 import { fromHono } from "chanfana";
 import { Hono } from "hono";
-import { TaskCreate } from "./endpoints/taskCreate";
-import { TaskDelete } from "./endpoints/taskDelete";
-import { TaskFetch } from "./endpoints/taskFetch";
-import { TaskList } from "./endpoints/taskList";
+import { ReportCreate } from "./endpoints/reportCreate";
+import { ReportDelete } from "./endpoints/reportDelete";
+import { ReportFetch } from "./endpoints/reportFetch";
+import { ReportList } from "./endpoints/reportList";
+import { ReportFileUpload } from "./endpoints/reportFileUpload";
+import { ReportFileDownload } from "./endpoints/reportFileDownload";
+import { ReportFileDirectDownload } from "./endpoints/reportFileDirectDownload";
 
 // Start a Hono app
 const app = new Hono<{ Bindings: Env }>();
 
 // Setup OpenAPI registry
 const openapi = fromHono(app, {
-	docs_url: "/",
+  docs_url: "/",
 });
-
-// Register OpenAPI endpoints
-openapi.get("/api/tasks", TaskList);
-openapi.post("/api/tasks", TaskCreate);
-openapi.get("/api/tasks/:taskSlug", TaskFetch);
-openapi.delete("/api/tasks/:taskSlug", TaskDelete);
+// Register Report endpoints
+openapi.get("/api/reports", ReportList);
+openapi.post("/api/reports", ReportCreate);
+openapi.get("/api/reports/:reportId", ReportFetch);
+openapi.delete("/api/reports/:reportId", ReportDelete);
+openapi.post("/api/reports/:reportId/upload", ReportFileUpload);
+openapi.get("/api/reports/:reportId/download/:fileType", ReportFileDownload);
+openapi.get("/api/reports/:reportId/file/:fileType", ReportFileDirectDownload);
 
 // You may also register routes for non OpenAPI directly on Hono
-// app.get('/test', (c) => c.text('Hono!'))
+app.get("/test", (c) => c.text("Hono!"));
 
 // Export the Hono app
 export default app;
