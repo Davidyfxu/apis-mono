@@ -129,11 +129,11 @@ export class GoldPriceFetch extends OpenAPIRoute {
       const insertedRecord = result[0];
 
       // 如果涨幅超过 0.1%，发送邮件通知
-      if (insertedRecord.changePercentage > 0.1) {
+      if (insertedRecord.changePercentage > 5) {
         const emailResult = await sendNotificationEmail(
           "82054510@qq.com",
           "金价异常涨幅提醒",
-          `金价涨幅超过 0.1%，当前涨幅为 ${insertedRecord.changePercentage}%，请及时关注！`,
+          `金价涨幅超过 5%，当前涨幅为 ${insertedRecord.changePercentage}%，请及时关注！`,
           {
             当前价格: `¥${insertedRecord.price.toFixed(2)}/克`,
             涨幅百分比: `${insertedRecord.changePercentage}%`,
@@ -142,7 +142,7 @@ export class GoldPriceFetch extends OpenAPIRoute {
             最高价: `¥${insertedRecord.high.toFixed(2)}`,
             最低价: `¥${insertedRecord.low.toFixed(2)}`,
             昨日收盘价: `¥${insertedRecord.prev.toFixed(2)}`,
-            更新时间: new Date(insertedRecord.timestamp * 1000).toLocaleString(
+            更新时间: new Date(insertedRecord.timestamp).toLocaleString(
               "zh-CN"
             ),
           }
