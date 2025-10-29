@@ -2,6 +2,7 @@ import { OpenAPIRoute } from "chanfana";
 import { z } from "zod";
 import { createDatabase } from "../db";
 import { goldPrices } from "../db/schema";
+import { sendNotificationEmail } from "../utils/email";
 
 // Response schema for gold price API
 const GoldPriceAPIResponse = z.object({
@@ -91,7 +92,7 @@ export class GoldPriceFetch extends OpenAPIRoute {
       // Fetch gold price from API
       const apiUrl =
         "https://gold.g.apised.com/v1/latest?metals=XAU&base_currency=CNY&currencies=CNY&weight_unit=gram";
-      const apiKey = process.env.GOLD_API_KEY;
+      const apiKey = env.GOLD_API_KEY;
 
       const response = await fetch(apiUrl, {
         method: "GET",
@@ -126,6 +127,33 @@ export class GoldPriceFetch extends OpenAPIRoute {
         .returning();
 
       const insertedRecord = result[0];
+
+      // 如果涨幅超过 0.1%，发送邮件通知
+      if (insertedRecord.changePercentage > 0.1) {
+        const emailResult = await sendNotificationEmail(
+          "82054510@qq.com",
+          "金价异常涨幅提醒",
+          `金价涨幅超过 0.1%，当前涨幅为 ${insertedRecord.changePercentage}%，请及时关注！`,
+          {
+            当前价格: `¥${insertedRecord.price.toFixed(2)}/克`,
+            涨幅百分比: `${insertedRecord.changePercentage}%`,
+            涨幅金额: `¥${insertedRecord.change.toFixed(2)}`,
+            开盘价: `¥${insertedRecord.open.toFixed(2)}`,
+            最高价: `¥${insertedRecord.high.toFixed(2)}`,
+            最低价: `¥${insertedRecord.low.toFixed(2)}`,
+            昨日收盘价: `¥${insertedRecord.prev.toFixed(2)}`,
+            更新时间: new Date(insertedRecord.timestamp * 1000).toLocaleString(
+              "zh-CN"
+            ),
+          }
+        );
+
+        if (emailResult.success) {
+          console.log("邮件通知发送成功:", emailResult.messageId);
+        } else {
+          console.error("邮件通知发送失败:", emailResult.error);
+        }
+      }
 
       return c.json(
         {
