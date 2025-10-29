@@ -53,7 +53,7 @@ export async function scheduled(
 
   try {
     // 创建一个模拟的 Request 对象来调用现有的 API
-    const request = new Request("http://localhost/api/gold/fetch", {
+    const request = new Request("/api/gold/fetch", {
       method: "POST",
     });
 
