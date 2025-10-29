@@ -4,23 +4,26 @@
   "main": "src/index.ts",
   "compatibility_date": "2025-09-27",
   "observability": {
-    "enabled": true
+    "enabled": true,
   },
   "compatibility_flags": ["nodejs_compat"],
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "reports-db",
-      "database_id": "32147a4b-a397-4642-b188-98aaa13d7a8b"
-    }
+      "database_name": "api_mono_db",
+      "database_id": "303ea031-dd8f-4fe9-90c1-e5d00390b7b7",
+    },
   ],
   "r2_buckets": [
     {
       "binding": "REPORTS_BUCKET",
-      "bucket_name": "reports-storage"
-    }
+      "bucket_name": "reports-storage",
+    },
   ],
   "vars": {
-    "DOWNLOAD_SECRET": "deepseek"
-  }
+    "DOWNLOAD_SECRET": "deepseek",
+    "GOLD_API_KEY": "sk_36e2a0fbcd5877Dc48aa72Ad1EDf576c9E5c2e5E5395e60D",
+    "EMAIL_USER": "offerexpertau@yeah.net",
+    "EMAIL_PASSWORD": "HWDEOAXGKSVZEBDZ",
+  },
 }

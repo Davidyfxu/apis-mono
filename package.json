@@ -7,9 +7,9 @@
     "dev": "wrangler dev",
     "start": "wrangler dev --env=production",
     "cf-typegen": "wrangler types",
-    "db:setup": "wrangler d1 migrations apply reports-db --local && wrangler d1 migrations apply reports-db",
-    "db:local": "wrangler d1 migrations apply reports-db --local",
-    "db:prod": "wrangler d1 migrations apply reports-db"
+    "db:setup": "wrangler d1 migrations apply api_mono_db --local && wrangler d1 migrations apply api_mono_db",
+    "db:local": "wrangler d1 migrations apply api_mono_db --local",
+    "db:prod": "wrangler d1 migrations apply api_mono_db"
   },
   "dependencies": {
     "@libsql/client": "^0.15.15",
@@ -17,12 +17,14 @@
     "drizzle-orm": "^0.36.4",
     "hono": "^4.9.9",
     "lodash-es": "^4.17.21",
+    "nodemailer": "^6.9.16",
     "prettier": "^3.6.2",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.12",
     "@types/node": "22.13.0",
+    "@types/nodemailer": "^6.4.17",
     "@types/service-worker-mock": "^2.0.4",
     "wrangler": "^4.40.2"
   }

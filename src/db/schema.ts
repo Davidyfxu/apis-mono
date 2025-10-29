@@ -1,21 +1,22 @@
-import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
+import { sqliteTable, integer, real, text } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 
-export const reports = sqliteTable("reports", {
+// Gold prices table
+export const goldPrices = sqliteTable("gold_prices", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  title: text("title").notNull(),
-  date: text("date").notNull(),
-  description: text("description"),
-  word_file_url: text("word_file_url"),
-  mp3_file_url: text("mp3_file_url"),
-  created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`),
-  updated_at: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
+  timestamp: integer("timestamp", { mode: "number" }).notNull(),
+  price: real("price").notNull(),
+  changePercentage: real("change_percentage").notNull(),
+  change: real("change").notNull(),
+  open: real("open").notNull(),
+  high: real("high").notNull(),
+  low: real("low").notNull(),
+  prev: real("prev").notNull(),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
 });
 
-export type Report = typeof reports.$inferSelect;
-export type NewReport = typeof reports.$inferInsert;
-
-// 导出所有 schema 对象
 export const schema = {
-  reports,
+  goldPrices,
 };

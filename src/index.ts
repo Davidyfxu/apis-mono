@@ -1,13 +1,9 @@
 import { fromHono } from "chanfana";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { ReportCreate } from "./endpoints/reportCreate";
-import { ReportDelete } from "./endpoints/reportDelete";
-import { ReportFetch } from "./endpoints/reportFetch";
-import { ReportList } from "./endpoints/reportList";
-import { ReportFileUpload } from "./endpoints/reportFileUpload";
-import { ReportFileDownload } from "./endpoints/reportFileDownload";
-import { ReportFileDirectDownload } from "./endpoints/reportFileDirectDownload";
+import { GoldPriceFetch } from "./endpoints/goldPriceFetch";
+import { GoldPriceList } from "./endpoints/goldPriceList";
+import { EmailTest, EmailVerify } from "./endpoints/emailTest";
 
 // Start a Hono app
 const app = new Hono<{ Bindings: Env }>();
@@ -29,14 +25,14 @@ app.use(
 const openapi = fromHono(app, {
   docs_url: "/",
 });
-// Register Report endpoints
-openapi.get("/api/reports", ReportList);
-openapi.post("/api/reports", ReportCreate);
-openapi.get("/api/reports/:reportId", ReportFetch);
-openapi.delete("/api/reports/:reportId", ReportDelete);
-openapi.post("/api/reports/upload", ReportFileUpload);
-openapi.get("/api/reports/:reportId/download/:fileType", ReportFileDownload);
-openapi.get("/api/reports/:reportId/file/:fileType", ReportFileDirectDownload);
+
+// Register gold price endpoints
+openapi.post("/api/gold/fetch", GoldPriceFetch);
+openapi.get("/api/gold/list", GoldPriceList);
+
+// Register email endpoints
+openapi.post("/api/email/test", EmailTest);
+openapi.get("/api/email/verify", EmailVerify);
 
 // You may also register routes for non OpenAPI directly on Hono
 app.get("/test", (c) => c.text("Hono!"));
