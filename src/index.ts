@@ -52,9 +52,16 @@ export default {
       const response = await fetch("https://api.sinohub.best/api/gold/fetch", {
         method: "POST",
       });
-      const result = await response.json();
 
-      console.log("Gold price fetch result:", result);
+      if (response.ok) {
+        console.log("Gold price fetch successful:", response.status);
+      } else {
+        console.error(
+          "Gold price fetch failed:",
+          response.status,
+          response.statusText
+        );
+      }
     } catch (error) {
       console.error("Error in scheduled gold price fetch:", error);
     }
