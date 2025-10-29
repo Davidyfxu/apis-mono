@@ -38,32 +38,4 @@ openapi.get("/api/email/verify", EmailVerify);
 app.get("/test", (c) => c.text("Hono!"));
 
 // Export the Hono app
-export default {
-  // The Hono app handles regular HTTP requests
-  fetch: app.fetch,
-  // The scheduled function handles Cron triggers
-  async scheduled(
-    controller: ScheduledController,
-    env: Env,
-    ctx: ExecutionContext
-  ) {
-    try {
-      // 使用原生 fetch 方法直接调用 API
-      const response = await fetch("https://api.sinohub.best/api/gold/fetch", {
-        method: "POST",
-      });
-
-      if (response.ok) {
-        console.log("Gold price fetch successful:", response.status);
-      } else {
-        console.error(
-          "Gold price fetch failed:",
-          response.status,
-          response.statusText
-        );
-      }
-    } catch (error) {
-      console.error("Error in scheduled gold price fetch:", error);
-    }
-  },
-};
+export default app;
